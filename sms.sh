@@ -1,11 +1,10 @@
 #! /bin/bash
 
-# Your PIN Code if you have one to unlock your screen
+# Fill in the variable if you have a pin code to unlock your screen.
 SCREEN_PWD="19012013"
 PATH=$PATH:/system/xbin:/system/bin
+# Path to adb.
 ADB="./adb"
-
-number="$2"
 
 usage() {
     cat <<EOF >&2
@@ -26,23 +25,26 @@ unlock_screen()
 
 send_msg()
 {
-${ADB} shell am start -a android.intent.action.SENDTO \
-                      -d sms:${number} \
-                      --es sms_body "$message" \
-                      --ez exit_on_sent true
+    ${ADB} shell am start -a android.intent.action.SENDTO \
+                          -d sms:${number} \
+                          --es sms_body "$message" \
+                          --ez exit_on_sent true
 
-# sleep before sending text thru usb. 
-sleep 4
-${ADB} shell input keyevent 22
-sleep 1
-# simulate enter key
-${ADB} shell input keyevent 66
+    # sleep before sending text thru usb. 
+    sleep 4
+    ${ADB} shell input keyevent 22
+    sleep 1
+    # simulate enter key
+    ${ADB} shell input keyevent 66
 }
 
 case "${1:-''}" in 
-    'send')
-        unlock_screen
-        sleep 1
+    'sms')
+        if [ ! -z "$SCREEN_PWD" ]; then
+            unlock_screen
+            sleep 1
+        fi
+        number="$2"
         if [ $# -ge 3 ]; then 
             message="$3"
             while shift && [ -n "$3" ]; do
@@ -50,6 +52,7 @@ case "${1:-''}" in
             done
         fi
         send_msg
+        exit 0
         ;;
     *)
         usage
