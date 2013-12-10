@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# You PIN Code if you have one to unlock your screen
+# Your PIN Code if you have one to unlock your screen
 SCREEN_PWD="19012013"
 PATH=$PATH:/system/xbin:/system/bin
 ADB="./adb"
