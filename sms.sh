@@ -25,14 +25,6 @@ unlock_screen()
 
 send_msg()
 {
-
-if [ $# -ge 3 ]; then 
-    message="$3"
-    while shift && [ -n "$3" ]; do
-        message="${message} $3"
-    done
-fi
-
 ${ADB} shell am start -a android.intent.action.SENDTO \
                       -d sms:${number} \
                       --es sms_body "$message" \
@@ -46,16 +38,19 @@ sleep 1
 ${ADB} shell input keyevent 66
 }
 
-#[ -z "$1" ] && usage
-
 case "${1:-''}" in 
     'send')
         unlock_screen
         sleep 1
+        if [ $# -ge 3 ]; then 
+            message="$3"
+            while shift && [ -n "$3" ]; do
+                message="${message} $3"
+            done
+        fi
         send_msg
         ;;
     *)
         usage
         ;;
 esac
-
