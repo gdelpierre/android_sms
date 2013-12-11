@@ -62,7 +62,7 @@ send_msg()
 {
     ${ADB} shell am start -a android.intent.action.SENDTO \
                           -d sms:${number} \
-                          --es sms_body "$message" \
+                          --es sms_body ${message} \
                           --ez exit_on_sent true
 
     # sleep during sending text thru usb. 
