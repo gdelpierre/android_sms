@@ -31,7 +31,6 @@ adb was not found.
 Make sure the PATH define into ADB variable is right.
 Make sure adb file is an executable file.
 EOF
-           exit 1
        fi
        exit 1
    fi
