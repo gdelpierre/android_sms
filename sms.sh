@@ -65,7 +65,7 @@ send_msg()
                           --es sms_body "$message" \
                           --ez exit_on_sent true
 
-    # sleep before sending text thru usb. 
+    # sleep during sending text thru usb. 
     sleep 4
     ${ADB} shell input keyevent 22
     sleep 1
