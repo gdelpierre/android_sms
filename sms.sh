@@ -16,9 +16,16 @@ ADB="./adb"
 usage() {
     cat <<EOF >&2
 Usage: 
-    $0 [sms number message]
-    $0 [sms number,[number] message]
+    $0 sms number message
+    $0 sms number,[number] message
+    $0 sms number,[number] - <<EOF
 EOF
+    exit 1
+}
+
+die() 
+{
+    echo "$@"
     exit 1
 }
 
@@ -38,8 +45,7 @@ EOF
 
 check_if_device_connected()
 {
-    nb=$("$ADB" devices | grep -w 'device' | wc -l)
-    if [ "$nb" -lt 1 ]; then
+     if ! "$ADB" devices | grep -w 'device' > /dev/null ; then
         if [ ! "$DEBUG" -ne 1 ]; then
             echo "No device connected"
         fi
@@ -50,8 +56,18 @@ check_if_device_connected()
 check_screen_status()
 {
     status=$("$ADB" shell "dumpsys power" \
-        | sed -n "s/.*mScreenOn=\(.*\)./\1/p")
-    echo "$status"
+       | sed -n "s/.*mScreenOn=\(.*\)./\1/p")
+    case "$status" in 
+        true)
+            return 0
+            ;;
+        false)
+            return 1
+            ;;
+        *)
+            die "Unknown status: $status"
+            ;;
+    esac
 }
 
 turn_screen_on()
@@ -69,7 +85,7 @@ turn_screen_off()
 unlock_screen()
 {
     # Enter password
-    "$ADB" shell "input text "$SCREEN_PWD""
+    "$ADB" shell "input text $SCREEN_PWD"
     # Simulate enter key
     "$ADB" shell "input keyevent 66"
 }
@@ -89,11 +105,16 @@ send_msg()
     "$ADB" shell input keyevent 66
 }
 
+# Test if you give at least 3 arguments to your script.
+[ "$#" -ge 3 ] || usage
+
 case "${1:-''}" in 
     'sms')
         check_adb_path
         check_if_device_connected
-        if [ $(check_screen_status) == "false" ]; then
+        check_screen_status
+        result_screen="$?"
+        if [ "$result_screen" != 0 ]; then
             turn_screen_on
             sleep 1
             if [ ! -z "$SCREEN_PWD" ]; then
@@ -102,11 +123,10 @@ case "${1:-''}" in
             fi
         fi
         number="$2"
-        if [ $# -ge 3 ]; then 
-            message="$3"
-            while shift && [ -n "$3" ]; do
-                message="${message} $3"
-            done
+        shift 2 ; message="$@"
+        # ./sms.sh sms number,[number] - <<EOF 
+        if [ "$message" = '-' ] ; then
+            message=`cat`
         fi
         send_msg
         sleep 2
