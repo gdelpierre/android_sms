@@ -47,14 +47,31 @@ check_if_device_connected()
     fi
 }
 
+check_screen_status()
+{
+    status=$(${ADB} shell "dumpsys power" \
+        | sed -n "s/.*mScreenOn=\(.*\)./\1/p")
+    echo "$status"
+}
+
+turn_screen_on()
+{
+    # turn the screen on
+    ${ADB} shell "input keyevent 26"
+}
+
+turn_screen_off()
+{
+    # turn the screen off
+    ${ADB} shell "input keyevent 26"
+}
+
 unlock_screen()
 {
-    # Screen on
-    ${ADB} shell input keyevent 26
     # Enter password
-    ${ADB} shell input text ${SCREEN_PWD}
+    ${ADB} shell "input text ${SCREEN_PWD}"
     # Simulate enter key
-    ${ADB} shell input keyevent 66
+    ${ADB} shell "input keyevent 66"
 }
 
 send_msg()
@@ -72,13 +89,18 @@ send_msg()
     ${ADB} shell input keyevent 66
 }
 
+
 case "${1:-''}" in 
     'sms')
         check_adb_path
         check_if_device_connected
-        if [ ! -z "$SCREEN_PWD" ]; then
-            unlock_screen
+        if [ $(check_screen_status) == "false" ]; then
+            turn_screen_on
             sleep 1
+            if [ ! -z "$SCREEN_PWD" ]; then
+                unlock_screen
+                sleep 1
+            fi
         fi
         number="$2"
         if [ $# -ge 3 ]; then 
@@ -88,6 +110,8 @@ case "${1:-''}" in
             done
         fi
         send_msg
+        sleep 2
+        turn_screen_off
         exit 0
         ;;
     *)
