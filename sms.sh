@@ -24,7 +24,7 @@ EOF
 
 check_adb_path()
 {
-   if [ ! -x ${ADB} ]; then
+   if [ ! -x "$ADB" ]; then
        if [ ! "$DEBUG" -ne 1 ]; then
            cat <<EOF >&2
 adb was not found.
@@ -38,8 +38,8 @@ EOF
 
 check_if_device_connected()
 {
-    nb=$(${ADB} devices | grep -w 'device' | wc -l)
-    if [ ${nb} -lt 1 ]; then
+    nb=$("$ADB" devices | grep -w 'device' | wc -l)
+    if [ "$nb" -lt 1 ]; then
         if [ ! "$DEBUG" -ne 1 ]; then
             echo "No device connected"
         fi
@@ -49,7 +49,7 @@ check_if_device_connected()
 
 check_screen_status()
 {
-    status=$(${ADB} shell "dumpsys power" \
+    status=$("$ADB" shell "dumpsys power" \
         | sed -n "s/.*mScreenOn=\(.*\)./\1/p")
     echo "$status"
 }
@@ -57,36 +57,36 @@ check_screen_status()
 turn_screen_on()
 {
     # turn the screen on
-    ${ADB} shell "input keyevent 26"
+    "$ADB" shell "input keyevent 26"
 }
 
 turn_screen_off()
 {
     # turn the screen off
-    ${ADB} shell "input keyevent 26"
+    "$ADB" shell "input keyevent 26"
 }
 
 unlock_screen()
 {
     # Enter password
-    ${ADB} shell "input text ${SCREEN_PWD}"
+    "$ADB" shell "input text "$SCREEN_PWD""
     # Simulate enter key
-    ${ADB} shell "input keyevent 66"
+    "$ADB" shell "input keyevent 66"
 }
 
 send_msg()
 {
-    ${ADB} shell am start -a android.intent.action.SENDTO \
-                          -d sms:${number} \
-                          --es sms_body ${message} \
+    "$ADB" shell am start -a android.intent.action.SENDTO \
+                          -d sms:"$number" \
+                          --es sms_body "$message" \
                           --ez exit_on_sent true
 
     # sleep during sending text thru usb. 
     sleep 4
-    ${ADB} shell input keyevent 22
+    "$ADB" shell input keyevent 22
     sleep 1
     # simulate enter key
-    ${ADB} shell input keyevent 66
+    "$ADB" shell input keyevent 66
 }
 
 case "${1:-''}" in 
