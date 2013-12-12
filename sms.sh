@@ -89,7 +89,6 @@ send_msg()
     ${ADB} shell input keyevent 66
 }
 
-
 case "${1:-''}" in 
     'sms')
         check_adb_path
