@@ -43,6 +43,17 @@ EOF
    fi
 }
 
+check_if_adb_already_started()
+{
+    result=$(ps aocomm | grep -w 'adb' > /dev/null)
+    if [ ! "$?" != 0 ]; then
+        if [ ! "$DEBUG" -ne 1 ]; then
+            echo "Server already started. Kill him now"
+        fi
+        "$ADB" "kill-server"
+    fi
+}
+
 check_if_device_connected()
 {
     # Print the line immediately after regexp, but none the one contening
