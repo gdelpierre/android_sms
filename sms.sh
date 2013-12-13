@@ -45,13 +45,23 @@ EOF
 
 check_if_device_connected()
 {
-     if ! "$ADB" devices | grep -w 'device' > /dev/null ; then
+    # Print the line immediately after regexp, but none the one contening
+    # the regexp
+    result=$("$ADB" devices | sed -n '/List\ of\ devices\ attached/{n;p;}')
+    if ! echo "$result" | grep -w 'device' > /dev/null ; then
         if [ ! "$DEBUG" -ne 1 ]; then
-            echo "No device connected"
+            if [ -z "$result" ] ; then
+                die "Device not connected"
+            else
+                die "Error: $result"
+            fi
         fi
         exit 1
     fi
 }
+
+check_if_device_connected
+exit 0
 
 check_screen_status()
 {
