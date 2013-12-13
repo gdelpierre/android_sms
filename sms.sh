@@ -132,6 +132,7 @@ send_msg()
 case "${1:-''}" in 
     'sms')
         check_adb_path
+        check_if_adb_already_started
         check_if_device_connected
         check_screen_status
         result_screen="$?"
